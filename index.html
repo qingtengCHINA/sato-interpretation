@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <title data-i18n="page.title">sato 解读 · 一段没有运营者的代码</title>
+  <meta name="description" data-i18n-attr="content" data-i18n="page.desc"
+        content="用通俗语言一步一步读懂 sato：以太坊上一个没有团队、没有金库、没有管理员的 ERC-20 代币。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2309090b'/%3E%3Crect x='4' y='7' width='8' height='2' fill='%2334d399'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="logo" href="#hero">sato <span class="logo-sub" data-i18n="logo.sub">解读</span></a>
+    <button class="drawer-btn" id="chapterPill" type="button" aria-label="open chapter menu">
+      <span class="drawer-btn-icon">≡</span>
+      <span class="drawer-btn-label" id="chapterPillLabel">00 · 幽灵又回来了</span>
+    </button>
+    <nav class="topbar-links">
+      <button class="lang-toggle" id="langToggle" type="button" aria-label="switch language">
+        <span class="lang-active" id="langActive">中</span>
+        <span class="lang-sep">/</span>
+        <span class="lang-other" id="langOther">EN</span>
+      </button>
+      <a href="https://sat0.org/whitepaper" target="_blank" rel="noreferrer" data-i18n="topbar.wp">原版白皮书 ↗</a>
+      <a href="https://etherscan.io/address/0x829f4B62EEBE12Af653b4dD4fFc480966F7d7f09" target="_blank" rel="noreferrer" data-i18n="topbar.chain">链上 ↗</a>
+    </nav>
+  </header>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <aside class="side-nav" id="sideNav">
+    <div class="side-nav-title" data-i18n="nav.title">分布式引导</div>
+    <ol>
+      <li><a href="#hero"><span class="step-num">00</span><span class="step-name" data-i18n="nav.0">幽灵又回来了</span></a></li>
+      <li><a href="#chapter-1"><span class="step-num">01</span><span class="step-name" data-i18n="nav.1">合约即发行者</span></a></li>
+      <li><a href="#chapter-2"><span class="step-num">02</span><span class="step-name" data-i18n="nav.2">储备池才是真本钱</span></a></li>
+      <li><a href="#chapter-3"><span class="step-num">03</span><span class="step-name" data-i18n="nav.3">曲线长什么样</span></a></li>
+      <li><a href="#chapter-4"><span class="step-num">04</span><span class="step-name" data-i18n="nav.4">三道防割线</span></a></li>
+      <li><a href="#chapter-5"><span class="step-num">05</span><span class="step-name" data-i18n="nav.5">优雅地老去</span></a></li>
+      <li><a href="#chapter-6"><span class="step-num">06</span><span class="step-name" data-i18n="nav.6">两个池，两种价</span></a></li>
+      <li><a href="#chapter-7"><span class="step-num">07</span><span class="step-name" data-i18n="nav.7">买在哪卖在哪</span></a></li>
+      <li><a href="#chapter-8"><span class="step-num">08</span><span class="step-name" data-i18n="nav.8">一句话总结</span></a></li>
+    </ol>
+  </aside>
+
+  <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="chapter menu">
+    <div class="drawer-panel">
+      <div class="drawer-head">
+        <div class="drawer-title" data-i18n="drawer.title">章节目录 · 分布式引导</div>
+        <button class="drawer-close" id="drawerClose" aria-label="close">✕</button>
+      </div>
+      <ol class="drawer-list">
+        <li><a href="#hero"><span class="step-num">00</span><span class="step-name" data-i18n="nav.0">幽灵又回来了</span></a></li>
+        <li><a href="#chapter-1"><span class="step-num">01</span><span class="step-name" data-i18n="nav.1">合约即发行者</span></a></li>
+        <li><a href="#chapter-2"><span class="step-num">02</span><span class="step-name" data-i18n="nav.2">储备池才是真本钱</span></a></li>
+        <li><a href="#chapter-3"><span class="step-num">03</span><span class="step-name" data-i18n="nav.3">曲线长什么样</span></a></li>
+        <li><a href="#chapter-4"><span class="step-num">04</span><span class="step-name" data-i18n="nav.4">三道防割线</span></a></li>
+        <li><a href="#chapter-5"><span class="step-num">05</span><span class="step-name" data-i18n="nav.5">优雅地老去</span></a></li>
+        <li><a href="#chapter-6"><span class="step-num">06</span><span class="step-name" data-i18n="nav.6">两个池，两种价</span></a></li>
+        <li><a href="#chapter-7"><span class="step-num">07</span><span class="step-name" data-i18n="nav.7">买在哪卖在哪</span></a></li>
+        <li><a href="#chapter-8"><span class="step-num">08</span><span class="step-name" data-i18n="nav.8">一句话总结</span></a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main>
+
+    <section id="hero" class="hero">
+      <div class="hero-badge" data-i18n="hero.badge">whitepaper 解读 · 中文版</div>
+      <h1 class="hero-title">
+        <span class="quiet" data-i18n="hero.title.q">一个幽灵在以太坊上游荡：</span>
+        <span class="emerald" data-i18n="hero.title.e">无人运营的代码</span>
+      </h1>
+      <p class="hero-sub" data-i18n="hero.sub">
+        sato 是以太坊上一个普普通通的 ERC-20。
+        全小写名字，全小写符号，18 位精度。
+        但它有一个不普通的地方——
+      </p>
+      <p class="hero-tag" data-i18n="hero.tag">
+        没有团队 · 没有金库 · 没有管理员 · 没有路线图 · 没有 V2
+      </p>
+      <div class="hero-cta">
+        <a href="#chapter-1" class="btn-primary" data-i18n="hero.btn.start">从第一章开始 →</a>
+        <a href="#chapter-8" class="btn-ghost" data-i18n="hero.btn.skip">直接看结论</a>
+      </div>
+      <div class="hero-meta">
+        <div><span class="k" data-i18n="hero.meta.contract">合约</span><code>0x829f…7f09</code></div>
+        <div><span class="k" data-i18n="hero.meta.genesis">创世区块</span><code>25,015,094</code></div>
+        <div><span class="k" data-i18n="hero.meta.chain">链</span><code>Ethereum Mainnet</code></div>
+      </div>
+    </section>
+
+    <section id="chapter-1" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 01</div>
+        <h2 data-i18n="ch1.title">合约即发行者</h2>
+        <p class="chapter-lead" data-i18n="ch1.lead">传统代币靠人发行；sato 靠数学发行。</p>
+      </div>
+      <div class="card">
+        <p data-i18n="ch1.card1.intro">这是一份 ERC-20，但它不像普通代币那样：</p>
+        <ul class="cross-list" data-i18n="ch1.card1.list">
+          <li>不会"先发行后增发"</li>
+          <li>没有团队预留份额、没有基金会份额、没有内部投资轮</li>
+          <li>没有路线图、没有 V2、没有"迁移到新合约"</li>
+          <li>没有管理员，没有暂停按钮，没有升级路径</li>
+        </ul>
+        <p class="emphasis" data-i18n="ch1.card1.emph">部署的那一刻，故事就讲完了。剩下的只是合约自己在跑。</p>
+      </div>
+      <div class="analogy">
+        <h3 data-i18n="ch1.analogy.title">一个比喻：sato 之于合约，正如比特币之于矿工</h3>
+        <div class="grid-2">
+          <div class="cmp-card">
+            <div class="cmp-title" data-i18n="ch1.analogy.btc.t">⛏ 比特币</div>
+            <p data-i18n="ch1.analogy.btc.p">矿工花电、花算力，把<span class="hl">"系统外的努力"</span>换成"系统内的供应"。</p>
+            <p class="cmp-rule" data-i18n="ch1.analogy.btc.r">规则：算力 → POW → 区块奖励</p>
+          </div>
+          <div class="cmp-card">
+            <div class="cmp-title" data-i18n="ch1.analogy.sato.t">🤖 sato</div>
+            <p data-i18n="ch1.analogy.sato.p">买家花 ETH，按曲线把<span class="hl">"系统外的资金"</span>换成"系统内的供应"。</p>
+            <p class="cmp-rule" data-i18n="ch1.analogy.sato.r">规则：ETH → 曲线公式 → 增发 sato</p>
+          </div>
+        </div>
+        <p class="muted" data-i18n="ch1.analogy.foot">两者本质相同：用一条公开、可验证的规则，把外部努力变成内部存量。</p>
+      </div>
+    </section>
+
+    <section id="chapter-2" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 02</div>
+        <h2 data-i18n="ch2.title">储备池才是真本钱</h2>
+        <p class="chapter-lead" data-i18n="ch2.lead">每一枚 sato 背后都压着一份 ETH。</p>
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-icon">💰</div>
+          <div class="flow-label" data-i18n="ch2.flow.buyer">买家钱包</div>
+        </div>
+        <div class="flow-arrow"><span>mint</span>→</div>
+        <div class="flow-step pool">
+          <div class="flow-icon">🏦</div>
+          <div class="flow-label" data-i18n="ch2.flow.pool">合约储备池</div>
+          <div class="flow-sub" data-i18n="ch2.flow.poolSub">只进不出（除非 burn）</div>
+        </div>
+        <div class="flow-arrow"><span>burn</span>→</div>
+        <div class="flow-step">
+          <div class="flow-icon">💎</div>
+          <div class="flow-label" data-i18n="ch2.flow.seller">卖家钱包</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 data-i18n="ch2.card.title">储备池意味着什么？</h3>
+        <ul class="checks" data-i18n="ch2.card.list">
+          <li><strong>每一枚 sato 都对应一份 ETH 存款</strong>，链上可查</li>
+          <li><strong>没有合成代币</strong>——不存在"凭空铸造再去打榜"的版本</li>
+          <li><strong>没有人能从池子里提钱</strong>——包括开发者本人</li>
+          <li><strong>唯一的出口是 burn</strong>，且按反向曲线计价</li>
+        </ul>
+      </div>
+      <p class="callout" data-i18n="ch2.callout">说人话：这个池子是 sato 的"金本位"。它就是兑付承诺本身。</p>
+    </section>
+
+    <section id="chapter-3" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 03</div>
+        <h2 data-i18n="ch3.title">曲线长什么样</h2>
+        <p class="chapter-lead" data-i18n="ch3.lead">数学决定了每一次铸造和销毁的价格。下面这张图与官网视觉一致，可拖动 / 触摸滑动。</p>
+      </div>
+
+      <div class="formula-row">
+        <div class="formula">
+          <div class="f-label" data-i18n="ch3.f1.label">铸造曲线（顺向）</div>
+          <pre>q(e) = K · (1 − e<sup>−e/S</sup>)
+K = 21,000,000   S = 500 ETH</pre>
+          <div class="f-explain" data-i18n="ch3.f1.exp">累计投入 e 个 ETH，应该有多少 sato 流通在外。</div>
+        </div>
+        <div class="formula">
+          <div class="f-label" data-i18n="ch3.f2.label">单价（mint 边际价）</div>
+          <pre>p(e) = (S / K) · e<sup>e/S</sup></pre>
+          <div class="f-explain" data-i18n="ch3.f2.exp">下一枚 sato 的成本，按指数增长。</div>
+        </div>
+        <div class="formula">
+          <div class="f-label" data-i18n="ch3.f3.label">销毁可得（反向）</div>
+          <pre>Δe(q,b) = S · ln((K−q+b) / (K−q))</pre>
+          <div class="f-explain" data-i18n="ch3.f3.exp">从当前供应 q 销毁 b 枚 sato，可以拿回多少 ETH。</div>
+        </div>
+      </div>
+
+      <div class="curve-card">
+        <div class="curve-toolbar">
+          <div class="legend">
+            <span class="legend-key">curve</span>
+            <span class="legend-supply"><i></i> supply</span>
+            <span class="legend-price"><i></i> price</span>
+            <span class="live-tag" id="liveDot" title="live data">live</span>
+          </div>
+          <button class="curve-reset" id="curveReset" type="button"><span data-i18n="ch3.curve.reset">↺ 当前位置</span></button>
+        </div>
+
+        <div class="curve-readout">
+          <div class="rd-line">
+            <span class="rd-label">supply</span>
+            <span class="rd-val" id="rdSupplyReal">18.4m</span>
+            <span class="rd-of">of</span>
+            <span class="rd-val" id="rdSupplyFwd">19.8m</span>
+            <span class="rd-of">forward</span>
+            <span class="rd-of">(drift</span>
+            <span class="rd-val rd-pink" id="rdDrift">1.4m</span>
+            <span class="rd-of">)</span>
+          </div>
+          <div class="rd-line">
+            <span class="rd-label">price</span>
+            <span class="rd-val rd-emerald" id="rdPrice">$0.89</span>
+            <span class="rd-box">
+              <span class="rd-pink">burn <b id="rdBurn">$0.40</b></span>
+              <span class="rd-sep">/</span>
+              <span class="rd-emerald">mint <b id="rdMint">$0.89</b></span>
+            </span>
+          </div>
+        </div>
+
+        <svg id="curveChart" viewBox="0 0 760 380" preserveAspectRatio="xMidYMid meet"
+             aria-label="sato bonding curve"></svg>
+
+        <p class="curve-foot" data-i18n="ch3.curve.foot">
+          <code class="emerald">21m</code> 是数学上的渐近线——曲线会无限逼近但永远不会触及。<br/>
+          铸造在原理上可以无限继续，价格随累计 ETH 指数级上升。
+        </p>
+        <p class="curve-foot muted small" data-i18n="ch3.curve.legend">
+          实心绿点 = 当前真实供应（mintedFair）；空心绿圈 = 公式 forward；粉点 = burn 价；
+          绿点 = mint 价；垂直虚线 = 当前 ethCum。
+        </p>
+      </div>
+
+      <div class="card subtle">
+        <p><strong data-i18n="ch3.read.title">看图说话：</strong></p>
+        <ul class="checks" data-i18n="ch3.read.list">
+          <li>开局便宜：刚部署时，少量 ETH 就能换很多 sato；</li>
+          <li>越往后越贵：曲线右半段几乎垂直，每多一枚 sato 都要消耗指数倍的 ETH；</li>
+          <li>有上限但永远到不了：理论上限 21m sato，价格上限 ∞；</li>
+          <li>所以也没人需要"硬顶供应"——曲线自己会让铸造冷下来。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="chapter-4" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 04</div>
+        <h2 data-i18n="ch4.title">三道防割线</h2>
+        <p class="chapter-lead" data-i18n="ch4.lead">没有运营者，那靠什么防止机器人和闪电贷把曲线吃干？</p>
+      </div>
+      <div class="defense-grid">
+        <div class="defense-card">
+          <div class="d-num">①</div>
+          <h3 data-i18n="ch4.d1.title">单笔上限 5 ETH</h3>
+          <p data-i18n="ch4.d1.body">每一次 mint 最多花掉 5 ETH。没人能用一笔交易吞下有意义的份额。</p>
+          <p class="d-effect" data-i18n="ch4.d1.eff">→ 巨鲸只能慢慢来，和散户一样。</p>
+        </div>
+        <div class="defense-card">
+          <div class="d-num">②</div>
+          <h3 data-i18n="ch4.d2.title">同块销毁回滚</h3>
+          <p data-i18n="ch4.d2.body">如果你在同一区块里又 mint 又 burn，交易会被拒绝。</p>
+          <p class="d-effect" data-i18n="ch4.d2.eff">→ 闪电贷套利路径直接被切断。</p>
+        </div>
+        <div class="defense-card">
+          <div class="d-num">③</div>
+          <h3 data-i18n="ch4.d3.title">开局 100 块的随机税</h3>
+          <p data-i18n="ch4.d3.body">部署后头 100 个区块，每次 mint 都被随机乘 0.9~1.1。</p>
+          <p class="d-effect" data-i18n="ch4.d3.eff">→ 针对部署区块调好的狙击机器人，平均吃 10% 的亏。<br/><span class="muted">（这个窗口已经关闭，现在曲线 100% 确定。）</span></p>
+        </div>
+        <div class="defense-card highlight">
+          <div class="d-num">④</div>
+          <h3 data-i18n="ch4.d4.title">0.3% 的"稳定杆"</h3>
+          <p data-i18n="ch4.d4.body">每次 mint 和 burn，两端都收 0.3%。这笔费<strong>永远</strong>留在合约里。</p>
+          <p class="d-effect" data-i18n="ch4.d4.eff">→ 不是金库——它没法被取走、被治理、被投票。它只是一根没人能拔的稳定杆。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="chapter-5" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 05</div>
+        <h2 data-i18n="ch5.title">它会优雅地老去</h2>
+        <p class="chapter-lead" data-i18n="ch5.lead">不是关停，是"自然停止铸造"。</p>
+      </div>
+      <div class="lifecycle">
+        <div class="phase phase-1">
+          <div class="phase-emoji">🌱</div>
+          <div class="phase-title" data-i18n="ch5.p1.t">Bootstrap 阶段</div>
+          <div class="phase-desc" data-i18n="ch5.p1.d">曲线是唯一入口，每一笔买卖都和合约直接对手</div>
+        </div>
+        <div class="phase phase-arrow">→</div>
+        <div class="phase phase-2">
+          <div class="phase-emoji">🌳</div>
+          <div class="phase-title" data-i18n="ch5.p2.t">成熟期</div>
+          <div class="phase-desc" data-i18n="ch5.p2.d">二级 AMM 池有了深度，曲线变成"必要时才用"的发行者</div>
+        </div>
+        <div class="phase phase-arrow">→</div>
+        <div class="phase phase-3">
+          <div class="phase-emoji">🏛</div>
+          <div class="phase-title" data-i18n="ch5.p3.t">休眠期</div>
+          <div class="phase-desc" data-i18n="ch5.p3.d">铸造价 &gt; 市场价，铸造自动停止；销毁仍可以兑付储备</div>
+        </div>
+      </div>
+      <div class="card" data-i18n="ch5.card">
+        <p>这套设计有一个反直觉的优雅之处：</p>
+        <p class="emphasis">没人需要去"关停 sato"。它会在变得无利可图的那一刻自动安静下来。</p>
+        <p>但即便铸造停了，<strong>储备池依然存在</strong>，<strong>burn 依然可用</strong>——你想离场，永远有路。</p>
+      </div>
+    </section>
+
+    <section id="chapter-6" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 06</div>
+        <h2 data-i18n="ch6.title">两个池，两种命运</h2>
+        <p class="chapter-lead" data-i18n="ch6.lead">在 Uniswap V4 上，sato 同时活在两个池子里。</p>
+      </div>
+      <div class="pools-grid">
+        <div class="pool-card pool-curve">
+          <div class="pool-tag">curve pool · with hook</div>
+          <h3 data-i18n="ch6.curve.title">曲线池</h3>
+          <p data-i18n="ch6.curve.body">挂着 sato 自家 hook（<code>SatoSwapRouter</code> 的目标）</p>
+          <ul class="checks" data-i18n="ch6.curve.list">
+            <li>买/卖按公式定价（顺向 / 反向曲线）</li>
+            <li>mint = 买方向，burn = 卖方向</li>
+            <li>会真的<strong>改变 totalSupply</strong></li>
+            <li>会真的<strong>动用储备池</strong></li>
+          </ul>
+        </div>
+        <div class="pool-card pool-secondary">
+          <div class="pool-tag">secondary · no hook</div>
+          <h3 data-i18n="ch6.sec.title">二级池 sato/usdt</h3>
+          <p data-i18n="ch6.sec.body">普通的 V4 池，AMM 流动性提供者撑起来的。</p>
+          <ul class="checks" data-i18n="ch6.sec.list">
+            <li>买/卖按市场撮合定价</li>
+            <li>不改变 totalSupply</li>
+            <li>不动储备池</li>
+            <li>大多数交易所、聚合器走这里</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card subtle">
+        <p data-i18n="ch6.note"><strong>关键认知：</strong> "burn 销毁"不是网站功能，而是<strong>对曲线池的一次特定 swap</strong>。任何走曲线池的卖单都会触发 burn；任何走二级池的卖单都不会。</p>
+      </div>
+    </section>
+
+    <section id="chapter-7" class="chapter">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 07</div>
+        <h2 data-i18n="ch7.title">买在哪？卖在哪？</h2>
+        <p class="chapter-lead" data-i18n="ch7.lead">两个池子有两套报价，差价时不时会反转。</p>
+      </div>
+      <div class="quote-formula">
+        <div class="qf-title" data-i18n="ch7.qf.title">曲线 burn 报价（每枚 sato 能换多少 ETH）</div>
+        <pre data-i18n="ch7.qf.code">burn_price (ETH/sato)
+  = (S / (K − mintedFair))            ← 当前位置的反向边际价
+  · (mintedFair / totalSupply)        ← 名义/真实供应量修正
+  · (1 − 0.003)                       ← 0.3% 协议费（留在储备里）</pre>
+      </div>
+      <div class="decision-table">
+        <div class="dt-row dt-head">
+          <div data-i18n="ch7.dt.h1">情况</div><div data-i18n="ch7.dt.h2">建议路径</div><div data-i18n="ch7.dt.h3">为什么</div>
+        </div>
+        <div class="dt-row">
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h1" data-label="情况"><span data-i18n="ch7.dt.r1.s">市场冷清，二级出价稀薄</span></div>
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h2" data-label="建议路径" class="emerald-text"><span data-i18n="ch7.dt.r1.p">走曲线 burn</span></div>
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h3" data-label="为什么"><span data-i18n="ch7.dt.r1.w">合约永远报价，是天然的"最后买家"</span></div>
+        </div>
+        <div class="dt-row">
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h1" data-label="情况"><span data-i18n="ch7.dt.r2.s">成熟期，二级 LP 报价紧凑</span></div>
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h2" data-label="建议路径" class="emerald-text"><span data-i18n="ch7.dt.r2.p">走二级 swap</span></div>
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h3" data-label="为什么"><span data-i18n="ch7.dt.r2.w">市场价通常优于反向曲线（曲线还有 0.3% 摩擦）</span></div>
+        </div>
+        <div class="dt-row">
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h1" data-label="情况"><span data-i18n="ch7.dt.r3.s">买入时</span></div>
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h2" data-label="建议路径" class="emerald-text"><span data-i18n="ch7.dt.r3.p">比较两边报价</span></div>
+          <div data-i18n-attr="data-label" data-i18n="ch7.dt.h3" data-label="为什么"><span data-i18n="ch7.dt.r3.w">在 sat0.org 看曲线 mint 价；二级看 Uniswap</span></div>
+        </div>
+      </div>
+      <p class="muted small" data-i18n="ch7.note">小提示：聚合器（1inch / 0x / paraswap / Uniswap Router）默认走二级池。要走曲线必须直连 <code>SatoSwapRouter</code>。</p>
+    </section>
+
+    <section id="chapter-8" class="chapter chapter-final">
+      <div class="chapter-head">
+        <div class="chapter-num">§ 08</div>
+        <h2 data-i18n="ch8.title">一句话总结</h2>
+      </div>
+      <blockquote class="manifesto" data-i18n="ch8.manifesto">
+        如果今晚部署 sato 的人全部消失，<br/>
+        明天这份合约依然按同样的规则、同样的价格继续运行。<br/>
+        <span class="emerald">这就是「无运营者」的全部含义。它是 sato 的唯一特性。</span>
+      </blockquote>
+      <div class="proof-block">
+        <div class="proof-title" data-i18n="ch8.proof.title">链上证据</div>
+        <div class="proof-row">
+          <span class="proof-key">token</span>
+          <a class="proof-val" href="https://etherscan.io/address/0x829f4B62EEBE12Af653b4dD4fFc480966F7d7f09" target="_blank" rel="noreferrer">0x829f4B62EEBE12Af653b4dD4fFc480966F7d7f09</a>
+        </div>
+        <div class="proof-row">
+          <span class="proof-key">hook</span>
+          <a class="proof-val" href="https://etherscan.io/address/0x0000f07d2B5F1Ddf3244b8780F972f306EFd2888" target="_blank" rel="noreferrer">0x0000f07d2B5F1Ddf3244b8780F972f306EFd2888</a>
+        </div>
+        <div class="proof-row">
+          <span class="proof-key">manager</span>
+          <a class="proof-val" href="https://etherscan.io/address/0x000000000004444c5dc75cB358380D2e3dE08A90" target="_blank" rel="noreferrer">0x000000000004444c5dc75cB358380D2e3dE08A90</a>
+        </div>
+        <div class="proof-row">
+          <span class="proof-key">genesis</span>
+          <span class="proof-val">block 25,015,094</span>
+        </div>
+      </div>
+      <div class="end-cta">
+        <a href="https://sat0.org" target="_blank" rel="noreferrer" class="btn-primary" data-i18n="ch8.cta.trade">前往 sat0.org 交易</a>
+        <a href="https://sat0.org/whitepaper" target="_blank" rel="noreferrer" class="btn-ghost" data-i18n="ch8.cta.read">读原版白皮书</a>
+      </div>
+      <footer class="page-footer">
+        <p data-i18n="footer">本页是对 sat0.org/whitepaper 的中文通俗解读，非官方。所有数据请以链上和官方页面为准。</p>
+      </footer>
+    </section>
+
+  </main>
+
+  <script src="i18n.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
